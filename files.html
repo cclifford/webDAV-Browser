@@ -1,0 +1,55 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name='robots' content='noindex, nofollow'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="files.css" />
+    <title>File Browser</title>
+    <style>
+      header .hidden {
+	  display: none;
+      }
+      #textInput form {
+	  display: inline;
+      }
+      
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <header>
+	<h2 id="directory"></h2>
+	<div id='buttons'></div>
+	<div id='confirm', class='hidden'></div>
+	<div id='textInput', class='hidden'></div>
+      </header>
+      <main>
+	<div id='filebrowser'>
+	  <noscript>
+	    Sorry, this application requires JavaScript to run. 
+	  </noscript>
+	</div>
+	  <div id='selected'>
+	  </div>
+      </main>
+      <footer>
+      </footer>
+    </div>
+    <script type='module'>
+      import {DavFs} from '/webdav-JS/webdav.js';
+      import {EventHandlers, FileContext, ButtonManager} from '/webdav-JS/files.js';
+      var urlParams = new URLSearchParams(document.location.search)
+      var ctx = new FileContext(urlParams.get('root'), '', DavFs());
+      var handlers = new EventHandlers(ctx,
+				      document.getElementById('filebrowser'),
+				      document.getElementById('directory'),
+				      document.getElementById('selected'));
+      handlers.refreshList();
+      handlers.refreshTitle();
+      var btnmgr = new ButtonManager(handlers, document.getElementById('buttons'),
+				     document.getElementById('confirm'),
+				     document.getElementById('textInput'));
+//      btnmgr.create();
+    </script>
+  </body>
+</html>

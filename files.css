@@ -1,0 +1,146 @@
+html {
+    font-family: sans-serif
+}
+
+#container {
+    width:50rem;
+    max-width: 100%;
+    border: 1px solid black;
+    border-radius: 1rem;
+}
+
+main {
+    display: inline-block;
+    margin-top: 1rem;
+    border-top: 1px solid black;
+    height: 80%;
+    width: 100%;
+    background-color: lightgray;
+    border-bottom-right-radius: 1rem;
+    border-bottom-left-radius: 1rem;
+    
+}
+
+header div{
+    display: inline-block;
+    margin-right:1rem;
+    margin-left:1rem;
+    overflow:auto;
+    max-width: 90%;
+    white-space: nowrap;
+    scrollbar-width:0px;
+}
+
+header div * {
+    height: 2rem;
+}
+
+#filebrowser iframe{
+    width:98%;
+    height: 100%;
+    padding-left:1%;
+    border: none;
+}
+
+header .controlButton {
+    border: 1px solid darkgray;
+    margin-left: 0.2rem;
+    border-radius:0.3rem;
+}
+
+header h2{
+    margin-left: 0.5rem;
+}
+
+header h2 span {
+    border-radius: 0.3rem;
+    background-color: lightgray;
+    margin-right: 2px;
+}
+
+header h2 span:hover {
+    background-color: grey;
+    
+}
+
+header button {
+    font-size: 0.8rem;
+    vertical-align:middle;   
+    border: 1px solid darkgray;
+    margin-left: 0.2rem;
+    border-radius:0.3rem;
+}
+
+header button:hover {
+    background-color: gray;
+}
+
+#filebrowser {
+    height:85%;
+    max-height: 85%;
+    margin-top: 0rem;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: yes;
+    overflow:auto;
+    border-bottom: 1px solid black;
+}
+
+#selected {
+    height:15%;
+}
+
+.fileElement {
+    padding-left: 0.5rem;
+    border-bottom: 1px solid grey;
+    padding-top: 0.2rem;
+    padding-bottom: 0.2rem;
+}
+
+.fileElement:hover {
+    background-color: steelblue;
+}
+.selected {
+    background-color: steelblue;
+}
+
+.selected:hover {
+    background-color:  #e04561;
+}
+
+#selected {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    display:flex;
+    flex-wrap: wrap;
+    flex-direction:row;
+    max-width:100%;
+    overflow:auto;
+}
+
+
+.selectedElement {
+    padding-left:0.5rem;
+    padding-right:0.5rem;
+    margin-right:0.5rem;
+    margin-top: 0.5rem;
+    padding-top:auto;
+    padding-bottom:auto;
+    border-radius:0.75rem;
+    height: 1.5rem;
+    max-height:1.5rem;
+    background-color: lightsteelblue;
+    vertical-align: middle;
+}
+
+.selectedElement:hover {
+    background-color: #e04561 ;
+}
+
+.controlText{
+    margin-left: 0.2rem;
+    vertical-align:middle;
+    width: 45%;
+    height: 95%;
+}
+
