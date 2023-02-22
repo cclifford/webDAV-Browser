@@ -6,7 +6,6 @@ html {
     width:50rem;
     max-width: 100%;
     border: 1px solid black;
-    border-radius: 1rem;
 }
 
 main {
@@ -16,16 +15,13 @@ main {
     height: 80%;
     width: 100%;
     background-color: lightgray;
-    border-bottom-right-radius: 1rem;
-    border-bottom-left-radius: 1rem;
-    
 }
 
 header div{
     display: inline-block;
     margin-right:1rem;
     margin-left:1rem;
-    overflow:auto;
+/*    overflow:auto;*/
     max-width: 90%;
     white-space: nowrap;
     scrollbar-width:0px;
@@ -88,6 +84,8 @@ header button:hover {
 
 #selected {
     height:15%;
+	padding-bottom: 1rem;
+	background-color: white;
 }
 
 .fileElement {

@@ -1,8 +1,9 @@
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
-    <meta name='robots' content='noindex, nofollow'>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <meta name='robots' content='noindex, nofollow' />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="files.css" />
     <title>File Browser</title>
     <style>
@@ -36,10 +37,10 @@
       </footer>
     </div>
     <script type='module'>
-      import {DavFs} from '/webdav-JS/webdav.js';
-      import {EventHandlers, FileContext, ButtonManager} from '/webdav-JS/files.js';
+      import {DavFs} from '/webdav.js';
+      import {EventHandlers, FileContext, ButtonManager} from '/files.js';
       var urlParams = new URLSearchParams(document.location.search)
-      var ctx = new FileContext(urlParams.get('root'), '', DavFs());
+      var ctx = new FileContext(urlParams.get('root'), '', DavFs("http://localhost:8080"));
       var handlers = new EventHandlers(ctx,
 				      document.getElementById('filebrowser'),
 				      document.getElementById('directory'),
@@ -49,7 +50,6 @@
       var btnmgr = new ButtonManager(handlers, document.getElementById('buttons'),
 				     document.getElementById('confirm'),
 				     document.getElementById('textInput'));
-//      btnmgr.create();
     </script>
   </body>
 </html>
