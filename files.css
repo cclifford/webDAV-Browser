@@ -1,144 +1,85 @@
-html {
-    font-family: sans-serif
+:root {
+    /* Light theme – warm yellow family */
+    --bg: #fffdf5;          /* very pale yellow */
+    --text: #332e00;        /* dark amber */
+    --accent: #d4a017;      /* muted gold */
+    --accent-hover: #c18e0f;/* slightly darker gold */
+    --hover: #ffe066;       /* soft yellow */
+    --selected: #ffd24d;   /* bright highlight */
+    --border: #c9b96d;      /* light‑gold */
+    --radius: 4px;
+    --gap: 8px;
 }
 
-#container {
-    width:50rem;
-    max-width: 100%;
-    border: 1px solid black;
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #2b2600;          /* deep amber */
+        --text: #eee8d5;        /* light text */
+        --accent: #ffcc33;      /* bright gold */
+        --accent-hover: #e6b822;/* darker gold */
+        --hover: #665c00;       /* dark yellow */
+        --selected: #887a00;    /* muted selection */
+        --border: #665c00;      /* dark border */
+    }
 }
 
-main {
-    display: inline-block;
-    margin-top: 1rem;
-    border-top: 1px solid black;
-    height: 80%;
+/* Reset & base typography */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.5; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Container & header */
+#container { max-width: 50rem; margin: 0 auto; padding: var(--gap); border: 1px solid var(--border); display: flex; flex-direction: column; min-height: 100vh; }
+header { display: flex; flex-wrap: wrap; align-items: center; padding: calc(var(--gap) * 1.5); background: var(--accent); color: #fff; }
+header h2 { flex: 1 1 auto; margin: 0 0 var(--gap) 0; font-size: 1.2rem; }
+header button, .controlButton { background: transparent; color: #fff; border: 1px solid #fff; border-radius: var(--radius); padding: calc(var(--gap)/2) var(--gap); margin-left: var(--gap); font-size: 0.9rem; cursor: pointer; transition: background 0.2s; }
+header button:hover, .controlButton:hover { background: rgba(255,255,255,0.2); }
+
+/* Main layout */
+main { flex: 1 0 auto; display: flex; flex-direction: column; gap: var(--gap); margin-top: var(--gap); }
+#filebrowser { flex: 2 1 0; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; padding: var(--gap); }
+
+/* Make preview elements fill the container */
+#filebrowser iframe,
+#filebrowser img,
+#filebrowser video,
+#filebrowser object {
     width: 100%;
-    background-color: lightgray;
-}
-
-header div{
-    display: inline-block;
-    margin-right:1rem;
-    margin-left:1rem;
-/*    overflow:auto;*/
-    max-width: 90%;
-    white-space: nowrap;
-    scrollbar-width:0px;
-}
-
-header div * {
-    height: 2rem;
-}
-
-#filebrowser iframe{
-    width:98%;
     height: 100%;
-    padding-left:1%;
-    border: none;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
 }
-
-header .controlButton {
-    border: 1px solid darkgray;
-    margin-left: 0.2rem;
-    border-radius:0.3rem;
-}
-
-header h2{
-    margin-left: 0.5rem;
-}
-
-header h2 span {
-    border-radius: 0.3rem;
-    background-color: lightgray;
-    margin-right: 2px;
-}
-
-header h2 span:hover {
-    background-color: grey;
-    
-}
-
-header button {
-    font-size: 0.8rem;
-    vertical-align:middle;   
-    border: 1px solid darkgray;
-    margin-left: 0.2rem;
-    border-radius:0.3rem;
-}
-
-header button:hover {
-    background-color: gray;
-}
-
-#filebrowser {
-    height:85%;
-    max-height: 85%;
-    margin-top: 0rem;
+#selected {
+    flex: 0 0 auto;
+    width: 100%;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: #fff;
+    padding: var(--gap);
     display: flex;
-    flex-direction: column;
-    flex-wrap: yes;
-    overflow:auto;
-    border-bottom: 1px solid black;
-}
-
-#selected {
-    height:15%;
-	padding-bottom: 1rem;
-	background-color: white;
-}
-
-.fileElement {
-    padding-left: 0.5rem;
-    border-bottom: 1px solid grey;
-    padding-top: 0.2rem;
-    padding-bottom: 0.2rem;
-}
-
-.fileElement:hover {
-    background-color: steelblue;
-}
-.selected {
-    background-color: steelblue;
-}
-
-.selected:hover {
-    background-color:  #e04561;
-}
-
-#selected {
-    padding-left: 1rem;
-    padding-right: 1rem;
-    display:flex;
     flex-wrap: wrap;
-    flex-direction:row;
-    max-width:100%;
-    overflow:auto;
+    align-content: flex-start;
 }
 
+/* File list items */
+.fileElement { padding: calc(var(--gap)/2) var(--gap); border-bottom: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; }
+.fileElement:hover { background: var(--hover); }
+.fileElement.selected { background: var(--selected); }
 
-.selectedElement {
-    padding-left:0.5rem;
-    padding-right:0.5rem;
-    margin-right:0.5rem;
-    margin-top: 0.5rem;
-    padding-top:auto;
-    padding-bottom:auto;
-    border-radius:0.75rem;
-    height: 1.5rem;
-    max-height:1.5rem;
-    background-color: lightsteelblue;
-    vertical-align: middle;
+/* Selected “tags” (chips) */
+.selectedElement { background: var(--accent); color: #fff; border-radius: calc(var(--radius) * 2); padding: 0 calc(var(--gap)/2); margin: calc(var(--gap)/2); font-size: 0.85rem; display: inline-flex; align-items: center; }
+.selectedElement:hover { background: var(--accent-hover); }
+
+/* Control text (used in header controls) */
+.controlText { margin-left: var(--gap); vertical-align: middle; width: 45%; height: 95%; }
+
+/* Responsive breakpoint */
+@media (max-width: 600px) {
+    main { flex-direction: column; }
+    #filebrowser, #selected { flex: 1 1 auto; height: auto; max-height: none; }
+    header { flex-direction: column; align-items: flex-start; }
+    header button, .controlButton { margin-left: 0; margin-top: var(--gap); }
 }
-
-.selectedElement:hover {
-    background-color: #e04561 ;
-}
-
-.controlText{
-    margin-left: 0.2rem;
-    vertical-align:middle;
-    width: 45%;
-    height: 95%;
-}
-

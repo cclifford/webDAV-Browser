@@ -8,10 +8,10 @@
     <title>File Browser</title>
     <style>
       header .hidden {
-	  display: none;
+    display: none;
       }
       #textInput form {
-	  display: inline;
+    display: inline;
       }
       
     </style>
@@ -19,19 +19,19 @@
   <body>
     <div id="container">
       <header>
-	<h2 id="directory"></h2>
-	<div id='buttons'></div>
-	<div id='confirm', class='hidden'></div>
-	<div id='textInput', class='hidden'></div>
+  <h2 id="directory"></h2>
+  <div id='buttons'></div>
+  <div id='confirm' class='hidden'></div>
+  <div id='textInput' class='hidden'></div>
       </header>
       <main>
-	<div id='filebrowser'>
-	  <noscript>
-	    Sorry, this application requires JavaScript to run. 
-	  </noscript>
-	</div>
-	  <div id='selected'>
-	  </div>
+  <div id='filebrowser'>
+    <noscript>
+      Sorry, this application requires JavaScript to run.
+    </noscript>
+  </div>
+    <div id='selected'>
+    </div>
       </main>
       <footer>
       </footer>
@@ -40,16 +40,16 @@
       import {DavFs} from '/webdav.js';
       import {EventHandlers, FileContext, ButtonManager} from '/files.js';
       var urlParams = new URLSearchParams(document.location.search)
-      var ctx = new FileContext(urlParams.get('root'), '', DavFs("http://localhost:8080"));
+      var ctx = new FileContext(urlParams.get('root'), '', DavFs("http://127.0.0.1:8080"));
       var handlers = new EventHandlers(ctx,
-				      document.getElementById('filebrowser'),
-				      document.getElementById('directory'),
-				      document.getElementById('selected'));
+        document.getElementById('filebrowser'),
+        document.getElementById('directory'),
+        document.getElementById('selected'));
       handlers.refreshList();
       handlers.refreshTitle();
       var btnmgr = new ButtonManager(handlers, document.getElementById('buttons'),
-				     document.getElementById('confirm'),
-				     document.getElementById('textInput'));
+        document.getElementById('confirm'),
+        document.getElementById('textInput'));
     </script>
   </body>
 </html>
