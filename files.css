@@ -31,7 +31,7 @@ a:hover { text-decoration: underline; }
 
 /* Container & header */
 #container { max-width: 50rem; margin: 0 auto; padding: var(--gap); border: 1px solid var(--border); display: flex; flex-direction: column; min-height: 100vh; }
-header { display: flex; flex-wrap: wrap; align-items: center; padding: calc(var(--gap) * 1.5); background: var(--accent); color: #fff; }
+header { display: flex; flex-wrap: wrap; align-items: center; padding: calc(var(--gap) * 1.5); background: var(--accent); color: #fff; border-radius: var(--radius); }
 header h2 { flex: 1 1 auto; margin: 0 0 var(--gap) 0; font-size: 1.2rem; }
 header button, .controlButton { background: transparent; color: #fff; border: 1px solid #fff; border-radius: var(--radius); padding: calc(var(--gap)/2) var(--gap); margin-left: var(--gap); font-size: 0.9rem; cursor: pointer; transition: background 0.2s; }
 header button:hover, .controlButton:hover { background: rgba(255,255,255,0.2); }
@@ -68,6 +68,7 @@ main { flex: 1 0 auto; display: flex; flex-direction: column; gap: var(--gap); m
 .fileElement { padding: calc(var(--gap)/2) var(--gap); border-bottom: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; }
 .fileElement:hover { background: var(--hover); }
 .fileElement.selected { background: var(--selected); }
+.fileElement.cursor { background: var(--hover); outline: 2px solid var(--accent); }
 
 /* Selected “tags” (chips) */
 .selectedElement { background: var(--accent); color: #fff; border-radius: calc(var(--radius) * 2); padding: 0 calc(var(--gap)/2); margin: calc(var(--gap)/2); font-size: 0.85rem; display: inline-flex; align-items: center; }

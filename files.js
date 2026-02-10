@@ -106,11 +106,38 @@ function makeFileElement(o, ev, selectable) {
     return div;
 };
 
-function makePreview(blob) {
-    console.log(blob);
-    var obj = document.createElement('iframe');
-    obj.src = blob;
-    return obj;
+function makePreview(url, name) {
+    // Detect text-like extensions for syntax highlighting
+    const ext = name.split('.').pop().toLowerCase();
+    const TEXT_EXTS = ['txt','js','json','html','css','md','xml','csv','yml','yaml','py','java','c','cpp','rb','php','sh'];
+    if (typeof Prism !== 'undefined' && Prism !== null && TEXT_EXTS.includes(ext)) {
+        // Fetch the text and highlight with Prism
+        return fetch(url)
+            .then(r => r.text())
+            .then(txt => {
+                const pre = document.createElement('pre');
+                const code = document.createElement('code');
+                // Map some extensions to Prism language identifiers when needed
+                let lang = ext;
+                if (ext === 'js') lang = 'javascript';
+                else if (ext === 'json') lang = 'json';
+                else if (ext === 'html') lang = 'markup';
+                else if (ext === 'css') lang = 'css';
+                code.className = 'language-' + lang;
+                code.textContent = txt;
+                pre.appendChild(code);
+                // Highlight now (Prism may be async loaded)
+                if (Prism && Prism.highlightElement) {
+                    Prism.highlightElement(code);
+                }
+                return pre;
+            });
+    } else {
+        // Fallback to iframe for binary or unsupported types
+        const iframe = document.createElement('iframe');
+        iframe.src = url;
+        return Promise.resolve(iframe);
+    }
 }
 
 // Utility objects
@@ -362,6 +389,10 @@ function EventHandlers(ctx, fileElement, titleElement, selectElement) {
     this.previews = [];
     this.elements = new Map();
     this.selections = new Map();
+        // Cursor state for keyboard navigation
+        this.cursorPath = null;
+        this.cursorIndex = -1;
+        this.cursorVisible = false;
     this.onRefreshList = new Hook(this);
     this.onRefreshTitle = new Hook(this);
     this.onRefreshSelection = new Hook(this);
@@ -373,6 +404,90 @@ function EventHandlers(ctx, fileElement, titleElement, selectElement) {
     this.onPreview = new Hook(this);
     this.onClosePreview = new Hook(this);
     var ob = this;
+        // Global keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            const active = document.activeElement;
+            if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
+            const key = e.key;
+            // Navigation keys – always enable and also turn on cursor visibility
+            if (key === 'ArrowDown' || key === 'j' || key === 'ArrowUp' || key === 'k') {
+                const delta = (key === 'ArrowDown' || key === 'j') ? 1 : -1;
+                // If a preview pane is active, scroll it instead of moving the file cursor
+                if (ob.preview) {
+                    const scrollAmount = 100; // pixels per step – tweak as needed
+                    // Scroll the container that holds the preview elements
+                    if (ob.fileElement) {
+                        ob.fileElement.scrollBy({ top: delta * scrollAmount, behavior: 'smooth' });
+                    }
+                    // Try to scroll inside an iframe if it is same‑origin
+                    const first = ob.fileElement ? ob.fileElement.firstElementChild : null;
+                    if (first && first.tagName === 'IFRAME' && first.contentWindow) {
+                        try {
+                            first.contentWindow.scrollBy(0, delta * scrollAmount);
+                        } catch (e) {
+                            // Cross‑origin iframe – ignore
+                        }
+                    }
+                    e.preventDefault();
+                    return;
+                }
+                // Activate cursor visibility on first navigation attempt
+                if (!ob.cursorVisible) {
+                    ob.cursorVisible = true;
+                    // Initialise cursor to first item if none selected yet
+                    if (ob.cursorIndex < 0) {
+                        ob.setCursor(0);
+                    }
+                }
+                if (delta === 1) {
+                    ob.moveCursor(1);
+                } else {
+                    ob.moveCursor(-1);
+                }
+                e.preventDefault();
+                return;
+            }
+            // All other shortcuts work only when cursor is visible
+            if (!ob.cursorVisible) return;
+            if (key === 'Enter') { ob.activateCursor(); e.preventDefault(); }
+            else if (key === 'c') { ob.markCopiedOnClick(); e.preventDefault(); }
+            else if (key === 'p') { ob.copyOnClick(); e.preventDefault(); }
+            else if (key === 'd') { ob.deleteOnClick(); e.preventDefault(); }
+            else if (key === 'r') {
+                const btn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.trim() === 'rename');
+                if (btn) btn.click();
+                e.preventDefault();
+            }
+            else if (key === 'n') {
+                const btn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.trim() === 'create folder');
+                if (btn) btn.click();
+                e.preventDefault();
+            }
+            else if (key === 'u') {
+                const fileInput = document.querySelector('input[type="file"]');
+                if (fileInput) fileInput.click();
+                e.preventDefault();
+            }
+            else if (key === 'g') { ob.downloadEvent(); e.preventDefault(); }
+            else if (key === 'q') {
+                if (ob.preview) {
+                    ob.closePreviewOnClick();
+                } else {
+                    // go up one directory if possible
+                    if (ob.ctx.back && ob.ctx.back.length > 1) {
+                        ob.ctx.goUp();
+                    }
+                }
+                e.preventDefault();
+            }
+            else if (key === ' ') {
+                if (ob.cursorPath) {
+                    if (ob.ctx.selected.has(ob.cursorPath)) { ob.unselect(ob.cursorPath); }
+                    else { ob.select(ob.cursorPath); }
+                }
+                e.preventDefault();
+            }
+        });
 
     this.onDamage.add(function(x) {ob.refreshList();});
     this.onClosePreview.add(function(x) {ob.onDamage.do();});
@@ -470,7 +585,6 @@ function EventHandlers(ctx, fileElement, titleElement, selectElement) {
             }
             for(var i = 0; i < l.length; i++) {
                 if (l[i].url !== ob.ctx.path && l[i].displayname !== ''){
-
                     newElements.push(makeFileElement(l[i], onclick, true));
                 }
             }
@@ -479,6 +593,12 @@ function EventHandlers(ctx, fileElement, titleElement, selectElement) {
             for (var i = 0; i < newElements.length; i++) {
                 ob.fileElement.appendChild(newElements[i]);
                 ob.elements.set(newElements[i].dataset.path, newElements[i]);
+            }
+            // Set cursor to first entry after list refresh
+            if (newElements.length > 0) {
+                ob.setCursor(0);
+            } else {
+                ob.setCursor(-1);
             }
         });
         this.completionHandler(promise);
@@ -544,9 +664,11 @@ function EventHandlers(ctx, fileElement, titleElement, selectElement) {
         ob.onPreview.do();
         ob.ctx.downloadItems().forEach(p =>{
             ob.completionHandler(p.then(file => {
-                var obj = makePreview(file[0]);
-                ob.fileElement.appendChild(obj);
-                return file;
+                // file = [url, filename, optional callback]
+                return makePreview(file[0], file[1]).then(obj => {
+                    ob.fileElement.appendChild(obj);
+                    return file;
+                });
             }));
         });
     };
@@ -559,6 +681,57 @@ function EventHandlers(ctx, fileElement, titleElement, selectElement) {
         ob.onClosePreview.do();
     };
 
+    this.setCursor = function(index) {
+        // Ensure no stale cursor classes remain (prevents duplicates)
+        ob.elements.forEach(function(elem) { elem.classList.remove('cursor'); });
+        const keys = Array.from(ob.elements.keys());
+        if (index >= 0 && index < keys.length) {
+            ob.cursorIndex = index;
+            ob.cursorPath = keys[index];
+            const el = ob.elements.get(ob.cursorPath);
+            // Only show visual cursor if navigation has been activated
+            if (ob.cursorVisible) {
+                el.classList.add('cursor');
+            }
+            el.scrollIntoView({block: "nearest", inline: "nearest"});
+        } else {
+            ob.cursorIndex = -1;
+            ob.cursorPath = null;
+        }
+    };
+    this.moveCursor = function(delta) {
+        const keys = Array.from(ob.elements.keys());
+        if (keys.length === 0) return;
+        let newIdx = ob.cursorIndex + delta;
+        if (newIdx < 0) newIdx = 0;
+        if (newIdx >= keys.length) newIdx = keys.length - 1;
+        ob.setCursor(newIdx);
+    };
+    this.activateCursor = function() {
+        // Find the element that currently has the visual cursor.
+        // Fall back to the stored cursorPath if the DOM query fails (e.g., after a rapid refresh).
+        let el = document.querySelector('.fileElement.cursor');
+        if (!el) {
+            if (!ob.cursorPath) return;
+            el = ob.elements.get(ob.cursorPath);
+        }
+        if (!el) return;
+        const data = el.dataset;
+        if (data.directory === 'true') {
+            // Navigate into the directory and refresh UI.
+            ob.ctx.setDirectory(data.path);
+            // onDamage triggers refreshList, but we explicitly refresh to keep cursor in sync.
+            ob.refreshList();
+            ob.refreshTitle();
+            ob.refreshSelection();
+        } else {
+            // For files: make sure the file is selected and show the preview.
+            if (!ob.ctx.selected.has(data.path)) {
+                ob.select(data.path);
+            }
+            ob.previewOnClick();
+        }
+    };
     this.fileOnclick = function(e){
         var data = this.dataset;
         if (ob.doubleclick) { // double-click TODO use ondblclick handler
